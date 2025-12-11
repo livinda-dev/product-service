@@ -2,6 +2,7 @@ FROM php:8.4-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    nginx \
     git \
     unzip \
     libpq-dev \
@@ -13,7 +14,17 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Expose PHP-FPM port
-EXPOSE 9000
+# Copy Laravel project files
+COPY . /var/www/html
 
-CMD ["php-fpm"]
+# Copy Nginx configuration (adjusted path)
+COPY ../docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Fix permissions
+RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Expose the port Render expects (80)
+EXPOSE 80
+
+# Start both Nginx + PHP-FPM
+CMD service nginx start && php-fpm
