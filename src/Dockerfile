@@ -14,17 +14,17 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy Laravel project files
+# Copy Laravel project
 COPY . /var/www/html
 
-# Copy Nginx configuration (adjusted path)
-COPY ../docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+# Copy Nginx config
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Fix permissions
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose the port Render expects (80)
+# Expose HTTP port
 EXPOSE 80
 
-# Start both Nginx + PHP-FPM
+# Start Nginx + PHP-FPM
 CMD service nginx start && php-fpm
