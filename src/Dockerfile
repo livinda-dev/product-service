@@ -1,8 +1,7 @@
-FROM php:8.4-fpm
+FROM php:8.4-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    nginx \
     git \
     unzip \
     libpq-dev \
@@ -11,20 +10,16 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /var/www/html
+WORKDIR /app
 
-# Copy Laravel code into the container
-COPY . /var/www/html
+# Copy Laravel source
+COPY . .
 
-# Copy Nginx configuration
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-# Permissions for Laravel
-RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+# Expose Railway port
+EXPOSE 8080
 
-# Expose HTTP port
-EXPOSE 80
-
-# Start Nginx + PHP-FPM
-CMD service nginx start && php-fpm
+# Start Laravel
+CMD php artisan serve --host=0.0.0.0 --port=8080
