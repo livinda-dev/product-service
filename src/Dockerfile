@@ -14,13 +14,13 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy Laravel project
+# Copy Laravel code into the container
 COPY . /var/www/html
 
-# Copy Nginx config
+# Copy Nginx configuration
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Fix permissions
+# Permissions for Laravel
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose HTTP port
