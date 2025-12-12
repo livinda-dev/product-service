@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Set working directory
 WORKDIR /app
 
-# Copy Laravel source
+# Copy app
 COPY . .
 
 # Install PHP dependencies
@@ -21,5 +22,5 @@ RUN composer install --no-dev --optimize-autoloader
 # Expose Railway port
 EXPOSE 8080
 
-# Start Laravel
+# Start Laravel server
 CMD php artisan serve --host=0.0.0.0 --port=8080
