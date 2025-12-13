@@ -1,7 +1,10 @@
 FROM php:8.4-fpm
 
-# System deps
+# Install system packages
 RUN apt-get update && apt-get install -y \
+    nginx \
+    procps \
+    curl \
     git \
     unzip \
     libzip-dev \
@@ -10,24 +13,24 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libmariadb-dev \
-    && docker-php-ext-install \
-        pdo \
-        pdo_mysql \
-        zip
+    && docker-php-ext-install pdo pdo_mysql zip
 
-# Composer
+# Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy EVERYTHING first (artisan included)
+# Copy source
 COPY . .
 
-# Install dependencies
+# Install PHP deps
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Permissions
-RUN chmod -R 755 storage bootstrap/cache
+# Copy nginx config
+COPY nginx/default.conf /etc/nginx/sites-available/default
 
-EXPOSE 9000
-CMD ["php-fpm"]
+# Expose HTTP port
+EXPOSE 8080
+
+# Start both PHP-FPM and Nginx
+CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
