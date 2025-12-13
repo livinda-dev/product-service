@@ -1,6 +1,6 @@
 FROM php:8.4-fpm
 
-# Install system dependencies
+# System deps
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -13,26 +13,21 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install \
         pdo \
         pdo_mysql \
-        zip \
-    && docker-php-ext-enable pdo_mysql
+        zip
 
-# Install Composer
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy composer files first (for Docker cache)
-COPY composer.json composer.lock ./
-
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Copy the rest of the application
+# Copy EVERYTHING first (artisan included)
 COPY . .
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Permissions
 RUN chmod -R 755 storage bootstrap/cache
 
 EXPOSE 9000
-
 CMD ["php-fpm"]
