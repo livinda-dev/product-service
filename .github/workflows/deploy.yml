@@ -18,11 +18,11 @@ jobs:
           
 
       - name: Install dependencies
-        working-directory: ./src
+        working-directory: src
         run: composer install --no-interaction --prefer-dist
 
       - name: Run tests
-        working-directory: ./src
+        working-directory: src
         run: php artisan test
 
       - name: Deploy to Coolify (ONLY if tests pass)
