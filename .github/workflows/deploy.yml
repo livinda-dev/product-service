@@ -2,42 +2,25 @@ name: CI/CD Deploy to Coolify
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   ci-cd:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # ------------------
-      # CI
-      # ------------------
-      - name: Set up PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: 8.2
 
       - name: Install dependencies
-        working-directory: src
         run: composer install --no-interaction --prefer-dist
 
       - name: Run tests
-        working-directory: src
         run: php artisan test
-        env:
-          APP_ENV: testing
-          APP_KEY: base64:PiJ6fhwB8VxmPmlUNJgEYDhqmIRW06haLQYF8XvO4Ww=
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ":memory:"
 
-      # ------------------
-      # CD
-      # ------------------
-      - name: Deploy to Coolify
-        if: success()
-        run: |
-          curl -X POST "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}"
+      - name: Deploy to Coolify (ONLY if tests pass)
+        run: curl -X POST "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}"
