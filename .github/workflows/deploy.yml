@@ -16,14 +16,3 @@ jobs:
       - name: Trigger Coolify Deploy
         run: |
           curl -X POST "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}"
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-            php-version: '8.4'
-
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
-
-      - name: Run tests
-        run: php artisan test
