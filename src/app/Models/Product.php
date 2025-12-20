@@ -10,7 +10,7 @@ class Product extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = [
+    protected $fillable = 
         'name',
         'sku',
         'description',
