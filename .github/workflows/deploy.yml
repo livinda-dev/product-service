@@ -25,9 +25,9 @@ jobs:
       - name: Prepare app
         working-directory: src
         run: |
-          cp .env
+          cp .env.example .env
           php artisan key:generate
-
+          
       - name: Run tests
         working-directory: src
         run: php artisan test
