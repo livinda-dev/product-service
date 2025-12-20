@@ -15,11 +15,14 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
+          
 
       - name: Install dependencies
+        working-directory: ./src
         run: composer install --no-interaction --prefer-dist
 
       - name: Run tests
+        working-directory: ./src
         run: php artisan test
 
       - name: Deploy to Coolify (ONLY if tests pass)
