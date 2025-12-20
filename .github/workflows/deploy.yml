@@ -30,7 +30,7 @@ jobs:
         run: php artisan test
         env:
           APP_ENV: testing
-          APP_KEY: base64:fakekeyjustforci==
+          APP_KEY: base64:PiJ6fhwB8VxmPmlUNJgEYDhqmIRW06haLQYF8XvO4Ww=
           DB_CONNECTION: sqlite
           DB_DATABASE: ":memory:"
 
