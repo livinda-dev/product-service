@@ -1,3 +1,16 @@
+# what this git hub for
+
+- is to work on product service where user can add the product or remove
+- deploy in the cloud by using google service as VM and use coolify to deploy
+
+# How CI/CD work
+
+- set the rule to the branch main that can merge from development only if the branch development pass the CI
+- after merge to main the coolify will auto deploy
+
+
+
+
 # first commit
 - set up project
 - create `docker-compose.yml` file
