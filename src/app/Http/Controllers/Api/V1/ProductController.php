@@ -86,6 +86,20 @@ class ProductController extends Controller
 
 
 
+    $imageData = base64_decode($base64);
+
+    if ($imageData === false) {
+        throw new \Exception('Invalid base64 image');
+    }
+
+    $fileName = $folder . '/' . uniqid() . '.' . $extension;
+
+    \Storage::disk('public')->put($fileName, $imageData);
+
+    return $fileName;
+}
+
+
     public function destroy(Product $product)
     {
         // Delete image on product delete
