@@ -57,8 +57,6 @@ class ProductController extends Controller
 
 
 
-
-
     public function show(Product $product)
     {
         return response()->json($product);
@@ -81,6 +79,7 @@ class ProductController extends Controller
     return response()->json($product);
 
 }
+
 
 
     public function destroy(Product $product)
