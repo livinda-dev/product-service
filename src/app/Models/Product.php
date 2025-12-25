@@ -13,15 +13,15 @@ class Product extends Model
     protected $appends = ['image_url'];
 
     protected $fillable = [
-        'id',
-        'name',
-        'sku',
-        'description',
-        'price',
-        'stock',
-        'is_active',
-        'image', // ✅ REQUIRED
-    ];
+    'name',
+    'sku',
+    'description',
+    'price',
+    'stock',
+    'is_active',
+    'image',
+];
+
 
     protected $casts = [
         'price' => 'decimal:2',
