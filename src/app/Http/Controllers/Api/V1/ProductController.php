@@ -14,41 +14,29 @@ class ProductController extends Controller
 
 
     private function saveBase64Image(string $base64): string
-{
-    // Remove data:image/...;base64, if present
-    if (str_contains($base64, ',')) {
-        [, $base64] = explode(',', $base64, 2);
+    {
+        if (!preg_match('/^data:image\/(\w+);base64,/', $base64, $matches)) {
+            throw new \Exception('Invalid image data');
+        }
+
+        $extension = strtolower($matches[1]);
+        if (!in_array($extension, ['png', 'jpg', 'jpeg', 'webp'])) {
+            throw new \Exception('Unsupported image type');
+        }
+
+        $base64 = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
+        $binary = base64_decode($base64);
+
+        if ($binary === false) {
+            throw new \Exception('Invalid image data');
+        }
+
+        $fileName = 'products/' . Str::uuid() . '.' . $extension;
+
+        Storage::disk('public')->put($fileName, $binary);
+
+        return $fileName;
     }
-
-    // Fix spaces turned from "+"
-    $base64 = str_replace(' ', '+', $base64);
-
-    // Decode
-    $binary = base64_decode($base64);
-
-    if ($binary === false) {
-        throw new \Exception('Invalid image data');
-    }
-
-    // Detect image type from binary
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mime  = finfo_buffer($finfo, $binary);
-    finfo_close($finfo);
-
-    $extension = match ($mime) {
-        'image/png'  => 'png',
-        'image/jpeg' => 'jpg',
-        'image/jpg'  => 'jpg',
-        'image/webp' => 'webp',
-        default      => throw new \Exception('Unsupported image type'),
-    };
-
-    $fileName = 'products/' . Str::uuid() . '.' . $extension;
-
-    Storage::disk('public')->put($fileName, $binary);
-
-    return $fileName;
-}
 
 
 
