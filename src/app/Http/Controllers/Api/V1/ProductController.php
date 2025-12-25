@@ -22,9 +22,18 @@ class ProductController extends Controller
 
     public function store(ProductStoreRequest $request)
 {
-    $product = Product::create($request->validated());
+    $validatedData = $request->validated();
+    $images = $validatedData['images'];
+    unset($validatedData['images']);
 
-    return response()->json($product, 201);
+    $product = Product::create($validatedData);
+
+    foreach ($images as $base64Image) {
+        $imagePath = $this->saveBase64Image($base64Image);
+        $product->images()->create(['image_path' => $imagePath]);
+    }
+
+    return response()->json($product->load('images'), 201);
 }
 
     public function show(Product $product)
@@ -34,17 +43,32 @@ class ProductController extends Controller
 
     public function update(ProductUpdateRequest $request, Product $product)
 {
-    $data = $request->validated();
-    $product->update($data);
+    $validatedData = $request->validated();
+    $images = $validatedData['images'];
+    unset($validatedData['images']);
 
-    return response()->json($product);
+    // Delete old images
+    foreach ($product->images as $image) {
+        Storage::disk('public')->delete($image->image_path);
+        $image->delete();
+    }
+
+    $product->update($validatedData);
+
+    // Add new images
+    foreach ($images as $base64Image) {
+        $imagePath = $this->saveBase64Image($base64Image);
+        $product->images()->create(['image_path' => $imagePath]);
+    }
+
+    return response()->json($product->load('images'));
 }
 
     public function destroy(Product $product)
     {
-        // Delete image on product delete
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
+        // Delete images on product delete
+        foreach ($product->images as $image) {
+            Storage::disk('public')->delete($image->image_path);
         }
 
         $product->delete();

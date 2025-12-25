@@ -11,7 +11,6 @@ class Product extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $appends = ['image_url'];
 
     protected $fillable = [
     'name',
@@ -20,7 +19,6 @@ class Product extends Model
     'price',
     'stock',
     'is_active',
-    'image_url',
 ];
 
 
@@ -42,15 +40,9 @@ class Product extends Model
         });
     }
 
-
-
-public function getImageUrlAttribute()
-{
-    return $this->image
-        ? Storage::disk('public')->url($this->image)
-        : null;
-}
-
-
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
 }
 
