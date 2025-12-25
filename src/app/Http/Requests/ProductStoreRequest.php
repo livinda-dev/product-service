@@ -18,8 +18,7 @@ class ProductStoreRequest extends FormRequest
         'sku' => 'required|string|max:255|unique:products,sku',
         'price' => 'required|numeric|min:0',
         'stock' => 'required|integer|min:0',
-        'images' => 'present|array',
-        'images.*' => 'required|string',
+        'image_url' => 'nullable|string|max:255',
     ];
 }
 
