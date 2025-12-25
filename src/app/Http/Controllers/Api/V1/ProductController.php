@@ -15,35 +15,33 @@ class ProductController extends Controller
 
     private function saveBase64Image(string $base64): string
 {
-    // Remove whitespace & newlines
-    $base64 = preg_replace('/\s+/', '', $base64);
-
-    // Must contain comma
-    if (!str_contains($base64, ',')) {
-        throw new \Exception('Invalid image data');
+    // Remove data:image/...;base64, if present
+    if (str_contains($base64, ',')) {
+        [, $base64] = explode(',', $base64, 2);
     }
 
-    [$meta, $data] = explode(',', $base64, 2);
+    // Fix spaces turned from "+"
+    $base64 = str_replace(' ', '+', $base64);
 
-    // Validate mime
-    if (!str_starts_with($meta, 'data:image/') || !str_contains($meta, ';base64')) {
-        throw new \Exception('Invalid image data');
-    }
-
-    $extension = str_replace(
-        ['data:image/', ';base64'],
-        '',
-        $meta
-    );
-
-    $extension = strtolower($extension);
-
-    // Decode strictly
-    $binary = base64_decode($data, true);
+    // Decode
+    $binary = base64_decode($base64);
 
     if ($binary === false) {
-        throw new \Exception('Base64 decode failed');
+        throw new \Exception('Invalid image data');
     }
+
+    // Detect image type from binary
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime  = finfo_buffer($finfo, $binary);
+    finfo_close($finfo);
+
+    $extension = match ($mime) {
+        'image/png'  => 'png',
+        'image/jpeg' => 'jpg',
+        'image/jpg'  => 'jpg',
+        'image/webp' => 'webp',
+        default      => throw new \Exception('Unsupported image type'),
+    };
 
     $fileName = 'products/' . Str::uuid() . '.' . $extension;
 
@@ -51,6 +49,7 @@ class ProductController extends Controller
 
     return $fileName;
 }
+
 
 
 
