@@ -9,9 +9,9 @@ use App\Http\Requests\ProductUpdateRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-
 class ProductController extends Controller
 {
+
 
     private function saveBase64Image(string $base64): string
 {
@@ -65,7 +65,6 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request, Product $product)
 {
     $data = $request->validated();
-
     if (!empty($data['image'])) {
         // delete old image if exists
         if ($product->image) {
@@ -74,30 +73,13 @@ class ProductController extends Controller
 
         $data['image'] = $this->saveBase64Image($data['image']);
     }
-
+    $product->update($data);
     $product->update($data);
 
     return response()->json($product);
+
 }
 
-
-
-    
-
-
-
-    $imageData = base64_decode($base64);
-
-    if ($imageData === false) {
-        throw new \Exception('Invalid base64 image');
-    }
-
-    $fileName = $folder . '/' . uniqid() . '.' . $extension;
-
-    \Storage::disk('public')->put($fileName, $imageData);
-
-    return $fileName;
-}
 
 
     public function destroy(Product $product)
