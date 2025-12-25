@@ -18,7 +18,12 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libmariadb-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    libicu-dev \
+    && docker-php-ext-install \
+        pdo \
+        pdo_mysql \
+        zip \
+        intl
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -34,8 +39,6 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Copy nginx config (with client_max_body_size inside)
 COPY nginx/default.conf /etc/nginx/sites-available/default
 
-# Expose HTTP port
 EXPOSE 8080
 
-# Start both PHP-FPM and Nginx
 CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
