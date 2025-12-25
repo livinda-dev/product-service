@@ -47,8 +47,15 @@ class ProductController extends Controller
     $data = $request->validated();
 
     if (!empty($data['image'])) {
+    try {
         $data['image'] = $this->saveBase64Image($data['image']);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'message' => 'Invalid image data'
+        ], 422);
     }
+}
+
 
     $product = Product::create($data);
 
@@ -74,8 +81,6 @@ class ProductController extends Controller
         $data['image'] = $this->saveBase64Image($data['image']);
     }
     $product->update($data);
-    $product->update($data);
-
     return response()->json($product);
 
 }

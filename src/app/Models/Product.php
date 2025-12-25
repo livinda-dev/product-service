@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -40,10 +41,15 @@ class Product extends Model
         });
     }
 
-    public function getImageUrlAttribute()
-    {
-        return $this->image
-            ? asset('storage/' . $this->image)
-            : null;
+
+
+public function getImageUrlAttribute()
+{
+    if (!$this->image) {
+        return null;
     }
+
+    return Storage::disk('public')->url($this->image);
+}
+
 }
