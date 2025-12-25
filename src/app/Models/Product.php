@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
     public $incrementing = false;
     protected $keyType = 'string';
 
+    protected $appends = ['image_url'];
 
     protected $fillable = [
     'name',
@@ -19,8 +19,8 @@ class Product extends Model
     'price',
     'stock',
     'is_active',
+    'image',
 ];
-
 
 
     protected $casts = [
@@ -40,9 +40,10 @@ class Product extends Model
         });
     }
 
-    public function images()
+    public function getImageUrlAttribute()
     {
-        return $this->hasMany(ProductImage::class);
+        return $this->image
+            ? asset('storage/' . $this->image)
+            : null;
     }
 }
-
