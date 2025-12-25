@@ -1,5 +1,10 @@
 FROM php:8.4-fpm
 
+# PHP upload & memory limits (PERMANENT)
+RUN echo "upload_max_filesize=50M" > /usr/local/etc/php/conf.d/uploads.ini \
+ && echo "post_max_size=50M" >> /usr/local/etc/php/conf.d/uploads.ini \
+ && echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/uploads.ini
+
 # Install system packages
 RUN apt-get update && apt-get install -y \
     nginx \
@@ -26,7 +31,7 @@ COPY . .
 # Install PHP deps
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Copy nginx config
+# Copy nginx config (with client_max_body_size inside)
 COPY nginx/default.conf /etc/nginx/sites-available/default
 
 # Expose HTTP port
