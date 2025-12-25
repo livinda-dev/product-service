@@ -1,11 +1,11 @@
 FROM php:8.4-fpm
 
-# PHP upload & memory limits (PERMANENT)
+# PHP upload & memory limits
 RUN echo "upload_max_filesize=50M" > /usr/local/etc/php/conf.d/uploads.ini \
  && echo "post_max_size=50M" >> /usr/local/etc/php/conf.d/uploads.ini \
  && echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/uploads.ini
 
-# Install system packages
+# Install system packages (ADD libicu-dev)
 RUN apt-get update && apt-get install -y \
     nginx \
     procps \
@@ -18,7 +18,12 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libmariadb-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    libicu-dev \
+    && docker-php-ext-install \
+        pdo \
+        pdo_mysql \
+        zip \
+        intl
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -31,11 +36,9 @@ COPY . .
 # Install PHP deps
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Copy nginx config (with client_max_body_size inside)
+# Copy nginx config
 COPY nginx/default.conf /etc/nginx/sites-available/default
 
-# Expose HTTP port
 EXPOSE 8080
 
-# Start both PHP-FPM and Nginx
 CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
