@@ -9,9 +9,31 @@ use App\Http\Requests\ProductUpdateRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+
 class ProductController extends Controller
 {
 
+    private function saveBase64Image(string $base64): string
+{
+    // data:image/png;base64,xxxx
+    if (!preg_match('/^data:image\/(\w+);base64,/', $base64, $type)) {
+        throw new \Exception('Invalid image format');
+    }
+
+    $extension = $type[1];
+    $image = substr($base64, strpos($base64, ',') + 1);
+    $image = base64_decode($image);
+
+    if ($image === false) {
+        throw new \Exception('Base64 decode failed');
+    }
+
+    $fileName = 'products/' . Str::uuid() . '.' . $extension;
+
+    Storage::disk('public')->put($fileName, $image);
+
+    return $fileName;
+}
 
     public function index()
     {
@@ -22,19 +44,18 @@ class ProductController extends Controller
 
     public function store(ProductStoreRequest $request)
 {
-    $validatedData = $request->validated();
-    $images = $validatedData['images'];
-    unset($validatedData['images']);
+    $data = $request->validated();
 
-    $product = Product::create($validatedData);
-
-    foreach ($images as $base64Image) {
-        $imagePath = $this->saveBase64Image($base64Image);
-        $product->images()->create(['image_path' => $imagePath]);
+    if (!empty($data['image'])) {
+        $data['image'] = $this->saveBase64Image($data['image']);
     }
 
-    return response()->json($product->load('images'), 201);
+    $product = Product::create($data);
+
+    return response()->json($product, 201);
 }
+
+
 
     public function show(Product $product)
     {
@@ -43,32 +64,42 @@ class ProductController extends Controller
 
     public function update(ProductUpdateRequest $request, Product $product)
 {
-    $validatedData = $request->validated();
-    $images = $validatedData['images'];
-    unset($validatedData['images']);
+    $data = $request->validated();
 
-    // Delete old images
-    foreach ($product->images as $image) {
-        Storage::disk('public')->delete($image->image_path);
-        $image->delete();
+    if (!empty($data['image'])) {
+        // delete old image if exists
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+
+        $data['image'] = $this->saveBase64Image($data['image']);
     }
 
-    $product->update($validatedData);
+    $product->update($data);
 
-    // Add new images
-    foreach ($images as $base64Image) {
-        $imagePath = $this->saveBase64Image($base64Image);
-        $product->images()->create(['image_path' => $imagePath]);
-    }
-
-    return response()->json($product->load('images'));
+    return response()->json($product);
 }
+
+
+
+
+    if ($imageData === false) {
+        throw new \Exception('Invalid base64 image');
+    }
+
+    $fileName = $folder . '/' . uniqid() . '.' . $extension;
+
+    \Storage::disk('public')->put($fileName, $imageData);
+
+    return $fileName;
+}
+
 
     public function destroy(Product $product)
     {
-        // Delete images on product delete
-        foreach ($product->images as $image) {
-            Storage::disk('public')->delete($image->image_path);
+        // Delete image on product delete
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
         }
 
         $product->delete();
@@ -76,4 +107,3 @@ class ProductController extends Controller
         return response()->json(['message' => 'Deleted']);
     }
 }
-
