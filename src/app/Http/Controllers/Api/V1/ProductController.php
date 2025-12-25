@@ -69,17 +69,6 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request, Product $product)
 {
     $data = $request->validated();
-
-    if ($request->hasFile('image')) {
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
-        }
-
-        $data['image'] = $request
-            ->file('image')
-            ->store('products', 'public');
-    }
-
     $product->update($data);
 
     return response()->json($product);
