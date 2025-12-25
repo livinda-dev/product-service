@@ -13,32 +13,6 @@ class ProductController extends Controller
 {
 
 
-    private function saveBase64Image(string $base64): string
-    {
-        if (!preg_match('/^data:image\/(\w+);base64,/', $base64, $matches)) {
-            throw new \Exception('Invalid image data');
-        }
-
-        $extension = strtolower($matches[1]);
-        if (!in_array($extension, ['png', 'jpg', 'jpeg', 'webp'])) {
-            throw new \Exception('Unsupported image type');
-        }
-
-        $base64 = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
-        $binary = base64_decode($base64);
-
-        if ($binary === false) {
-            throw new \Exception('Invalid image data');
-        }
-
-        $fileName = 'products/' . Str::uuid() . '.' . $extension;
-
-        Storage::disk('public')->put($fileName, $binary);
-
-        return $fileName;
-    }
-
-
     public function index()
     {
         return response()->json(
@@ -61,11 +35,6 @@ class ProductController extends Controller
 
     return response()->json($product->load('images'), 201);
 }
-
-
-
-
-
 
     public function show(Product $product)
     {
@@ -95,9 +64,6 @@ class ProductController extends Controller
     return response()->json($product->load('images'));
 }
 
-
-
-
     public function destroy(Product $product)
     {
         // Delete images on product delete
@@ -110,3 +76,4 @@ class ProductController extends Controller
         return response()->json(['message' => 'Deleted']);
     }
 }
+
