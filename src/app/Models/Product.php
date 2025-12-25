@@ -10,13 +10,23 @@ class Product extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
+    protected $appends = ['image_url'];
+
     protected $fillable = [
+        'id',
         'name',
         'sku',
         'description',
         'price',
         'stock',
         'is_active',
+        'image', // ✅ REQUIRED
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'stock' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     protected static function boot()
@@ -29,5 +39,11 @@ class Product extends Model
             }
         });
     }
-}
 
+    public function getImageUrlAttribute()
+    {
+        return $this->image
+            ? asset('storage/' . $this->image)
+            : null;
+    }
+}
