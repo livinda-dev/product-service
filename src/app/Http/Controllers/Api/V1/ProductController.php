@@ -53,21 +53,17 @@ class ProductController extends Controller
 {
     $data = $request->validated();
 
-    if (!empty($data['image'])) {
-    try {
-        $data['image'] = $this->saveBase64Image($data['image']);
-    } catch (\Throwable $e) {
-        return response()->json([
-            'message' => 'Invalid image data'
-        ], 422);
+    if ($request->hasFile('image')) {
+        $data['image'] = $request
+            ->file('image')
+            ->store('products', 'public');
     }
-}
-
 
     $product = Product::create($data);
 
     return response()->json($product, 201);
 }
+
 
 
 
@@ -79,18 +75,22 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request, Product $product)
 {
     $data = $request->validated();
-    if (!empty($data['image'])) {
-        // delete old image if exists
+
+    if ($request->hasFile('image')) {
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
 
-        $data['image'] = $this->saveBase64Image($data['image']);
+        $data['image'] = $request
+            ->file('image')
+            ->store('products', 'public');
     }
-    $product->update($data);
-    return response()->json($product);
 
+    $product->update($data);
+
+    return response()->json($product);
 }
+
 
 
 
