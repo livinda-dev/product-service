@@ -15,25 +15,30 @@ class ProductController extends Controller
 
     private function saveBase64Image(string $base64): string
 {
-    // data:image/png;base64,xxxx
-    if (!preg_match('/^data:image\/(\w+);base64,/', $base64, $type)) {
-        throw new \Exception('Invalid image format');
+    // Remove whitespace and newlines
+    $base64 = preg_replace('/\s+/', '', $base64);
+
+    // Match data URI
+    if (!preg_match('/^data:image\/([a-zA-Z0-9+]+);base64,/', $base64, $matches)) {
+        throw new \Exception('Invalid image data');
     }
 
-    $extension = $type[1];
-    $image = substr($base64, strpos($base64, ',') + 1);
-    $image = base64_decode($image);
+    $extension = strtolower($matches[1]);
 
-    if ($image === false) {
+    $data = substr($base64, strpos($base64, ',') + 1);
+    $data = base64_decode($data, true);
+
+    if ($data === false) {
         throw new \Exception('Base64 decode failed');
     }
 
     $fileName = 'products/' . Str::uuid() . '.' . $extension;
 
-    Storage::disk('public')->put($fileName, $image);
+    Storage::disk('public')->put($fileName, $data);
 
     return $fileName;
 }
+
 
     public function index()
     {
